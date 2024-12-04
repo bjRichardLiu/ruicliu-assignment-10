@@ -1,0 +1,6 @@
+flask
+pandas
+pillow
+open_clip_torch
+torch
+tqdm

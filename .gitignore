@@ -1,0 +1,6 @@
+*.jpg
+*.pickle
+*.png
+*.pkl
+coco_images_resized/
+venv/
