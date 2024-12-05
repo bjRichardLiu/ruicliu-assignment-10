@@ -4,3 +4,4 @@ pillow
 open_clip_torch
 torch
 tqdm
+jsonify
