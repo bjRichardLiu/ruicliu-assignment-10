@@ -6,7 +6,7 @@ import pandas as pd
 import torch.nn.functional as F
 from open_clip import create_model_and_transforms, tokenizer
 import os
-from search import find_top_5_images, image_to_embedding, text_to_embedding, hybrid_to_embedding
+from search import find_top_5_images, image_to_embedding, text_to_embedding, hybrid_to_embedding, pca
 
 app = Flask(__name__)
 
@@ -28,6 +28,7 @@ def search():
     k = request.form.get('k')
     
     query_embedding = None
+    search_results = None
     
     if mode == 'text':
         query_embedding = text_to_embedding(text_query, model)
@@ -35,10 +36,11 @@ def search():
         query_embedding = image_to_embedding(image_query, model, preprocess)
     elif mode == 'hybrid':
         query_embedding = hybrid_to_embedding(text_query, image_query, model, float(lam), preprocess)
+    elif mode == 'pca':
+        search_results = pca(text_query, image_query, "static/coco_images_resized", model, int(k), preprocess)
     
-    if query_embedding is None:
-        return jsonify({'error': 'Invalid mode'})
-    search_results = find_top_5_images(query_embedding, df)
+    if search_results is None:
+        search_results = find_top_5_images(query_embedding, df)
     # Add folder path to file names
     for result in search_results:
         result['file_name'] = os.path.join("static", "coco_images_resized", result['file_name'])
