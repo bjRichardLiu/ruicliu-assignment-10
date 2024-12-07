@@ -80,32 +80,25 @@ def nearest_neighbors(query_embedding, embeddings, top_k=5):
     return nearest_indices, distances[nearest_indices]
 
 def pca(test, image, image_dir, model, k, preprocess):
-    # Check if pickle file exists
-    if os.path.exists('reduced_embeddings.pickle'):
-        with open('reduced_embeddings.pickle', 'rb') as f:
-            reduced_embeddings = pickle.load(f)
-    else:
-        # Step 1: Load and preprocess training images
-        train_images, train_image_names = load_images(image_dir, max_images=2000, target_size=(224, 224))
-        train_images = np.array(train_images)
-        
-        # Step 2: Apply PCA to reduce dimensions
-        pca = PCA(n_components=k)
-        pca.fit(train_images)
-        print("Finished PCA fitting")
-        
-        # Step 3: Load and preprocess all images for comparison
-        transform_images, transform_image_names = load_images(image_dir, max_images=10000, target_size=(224, 224))
-        reduced_embeddings = pca.transform(transform_images)
-        # Use pickle to save the reduced_embeddings
-        with open('reduced_embeddings.pickle', 'wb') as f:
-            pickle.dump(reduced_embeddings, f)
-        print("Finished PCA transformation")
+    # Step 1: Load and preprocess training images
+    train_images, train_image_names = load_images(image_dir, max_images=2000, target_size=(224, 224))
+    train_images = np.array(train_images)
+    
+    # Step 2: Apply PCA to reduce dimensions
+    pca = PCA(n_components=k)
+    pca.fit(train_images)
+    print("Finished PCA fitting")
+    
+    # Step 3: Load and preprocess all images for comparison
+    transform_images, transform_image_names = load_images(image_dir, max_images=10000, target_size=(224, 224))
+    reduced_embeddings = pca.transform(transform_images)
+    print("Finished PCA transformation")
     
     # Step 4: Load and preprocess the user input image
     user_image = preprocess_image(image, target_size=(224, 224))
     # Apply PCA to reduce dimensions
-    reduced_user_embedding = pca.transform(user_image.reshape(1, -1))
+    reduced_user_embedding = pca.transform(user_image.reshape(1, -1)).squeeze()
+    # reduced_user_embedding = reduced_embeddings[0]
     print("Finished PCA transformation for user input")
     
     # Step 5: Compute similarity (e.g., Euclidean distance)
